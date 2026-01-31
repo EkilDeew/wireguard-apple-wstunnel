@@ -9,6 +9,7 @@ public struct PeerConfiguration {
     public var allowedIPs = [IPAddressRange]()
     public var endpoint: Endpoint?
     public var persistentKeepAlive: UInt16?
+    public var useTunnel: Bool?
     public var rxBytes: UInt64?
     public var txBytes: UInt64?
     public var lastHandshakeTime: Date?
@@ -24,7 +25,8 @@ extension PeerConfiguration: Equatable {
             lhs.preSharedKey == rhs.preSharedKey &&
             Set(lhs.allowedIPs) == Set(rhs.allowedIPs) &&
             lhs.endpoint == rhs.endpoint &&
-            lhs.persistentKeepAlive == rhs.persistentKeepAlive
+            lhs.persistentKeepAlive == rhs.persistentKeepAlive &&
+            lhs.useTunnel == rhs.useTunnel
     }
 }
 
@@ -35,6 +37,6 @@ extension PeerConfiguration: Hashable {
         hasher.combine(Set(allowedIPs))
         hasher.combine(endpoint)
         hasher.combine(persistentKeepAlive)
-
+        hasher.combine(useTunnel)
     }
 }

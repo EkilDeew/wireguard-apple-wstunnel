@@ -18,6 +18,7 @@ enum highlight_type {
 	HighlightPort,
 	HighlightMTU,
 	HighlightKeepalive,
+    HighlightUseTunnel,
 	HighlightComment,
 	HighlightDelimiter,
 #ifndef MOBILE_WGQUICK_SUBSET

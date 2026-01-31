@@ -32,7 +32,12 @@ class PacketTunnelSettingsGenerator {
             let result = resolvedEndpoint.map(Self.reresolveEndpoint)
             if case .success((_, let resolvedEndpoint)) = result {
                 if case .name = resolvedEndpoint.host { assert(false, "Endpoint is not resolved") }
-                wgSettings.append("endpoint=\(resolvedEndpoint.stringRepresentation)\n")
+                if peer.useTunnel == true {
+                    // TODO: Make it dynamic ..
+                    wgSettings.append("endpoint=127.0.0.1:51820\n")
+                } else {
+                    wgSettings.append("endpoint=\(resolvedEndpoint.stringRepresentation)\n")
+                }
             }
             resolutionResults.append(result)
         }
@@ -60,7 +65,12 @@ class PacketTunnelSettingsGenerator {
             let result = resolvedEndpoint.map(Self.reresolveEndpoint)
             if case .success((_, let resolvedEndpoint)) = result {
                 if case .name = resolvedEndpoint.host { assert(false, "Endpoint is not resolved") }
-                wgSettings.append("endpoint=\(resolvedEndpoint.stringRepresentation)\n")
+                if peer.useTunnel == true {
+                    // TODO: Make it dynamic ..
+                    wgSettings.append("endpoint=127.0.0.1:51820\n")
+                } else {
+                    wgSettings.append("endpoint=\(resolvedEndpoint.stringRepresentation)\n")
+                }
             }
             resolutionResults.append(result)
 

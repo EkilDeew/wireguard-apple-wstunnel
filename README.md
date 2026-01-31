@@ -1,5 +1,14 @@
-# [WireGuard](https://www.wireguard.com/) for iOS and macOS
+# Wireguard with wstunnel
+This is a fork of wireguard that comes with an optional [wstunnel](https://github.com/erebe/wstunnel) integration.
+It can be enabled by adding
+- on iOS `on` in the "Use Tunnel" option in the pair settings
+- on macOS adding the entry `UseTunnel = on` in the pair section of the configuration.
 
+Change the endpoint to `<your hostname>:443`.
+
+
+# [WireGuard](https://www.wireguard.com/) for iOS and macOS
+ 
 This project contains an application for iOS and for macOS, as well as many components shared between the two of them. You may toggle between the two platforms by selecting the target from within Xcode.
 
 ## Building
@@ -23,6 +32,8 @@ $ vim Sources/WireGuardApp/Config/Developer.xcconfig
 ```
 $ brew install swiftlint go
 ```
+
+Also install rust for wstunnel integration: https://rustup.rs/
 
 - Open project in Xcode:
 

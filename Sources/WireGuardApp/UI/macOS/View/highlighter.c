@@ -221,6 +221,15 @@ static bool is_valid_persistentkeepalive(string_span_t s)
 	return is_valid_uint(s, false, 0, 65535);
 }
 
+static bool is_valid_use_tunnel(string_span_t s)
+{
+    if (is_same(s, "off"))
+        return true;
+    if (is_same(s, "on"))
+        return true;
+    return false;
+}
+
 #ifndef MOBILE_WGQUICK_SUBSET
 
 static bool is_valid_fwmark(string_span_t s)
@@ -357,6 +366,7 @@ enum field {
 	AllowedIPs,
 	Endpoint,
 	PersistentKeepalive,
+    UseTunnel,
 
 	Invalid
 };
@@ -383,6 +393,7 @@ static enum field get_field(string_span_t s)
 	check_enum(AllowedIPs);
 	check_enum(Endpoint);
 	check_enum(PersistentKeepalive);
+    check_enum(UseTunnel);
 #ifndef MOBILE_WGQUICK_SUBSET
 	check_enum(FwMark);
 	check_enum(Table);
@@ -545,6 +556,9 @@ static void highlight_value(struct highlight_span_array *ret, const string_span_
 	case PersistentKeepalive:
 		append_highlight_span(ret, parent.s, s, is_valid_persistentkeepalive(s) ? HighlightKeepalive : HighlightError);
 		break;
+    case UseTunnel:
+        append_highlight_span(ret, parent.s, s, is_valid_use_tunnel(s) ? HighlightUseTunnel : HighlightError);
+        break;
 	case Endpoint: {
 		size_t colon;
 

@@ -40,7 +40,8 @@ class ConfTextStorage: NSTextStorage {
             return [.font: boldFont]
         case HighlightPublicKey.rawValue, HighlightPrivateKey.rawValue, HighlightPresharedKey.rawValue,
              HighlightIP.rawValue, HighlightCidr.rawValue, HighlightHost.rawValue, HighlightPort.rawValue,
-             HighlightMTU.rawValue, HighlightKeepalive.rawValue, HighlightDelimiter.rawValue:
+             HighlightMTU.rawValue, HighlightKeepalive.rawValue, HighlightDelimiter.rawValue,
+            HighlightUseTunnel.rawValue:
             return [.font: defaultFont]
         case HighlightComment.rawValue:
             return [.font: italicFont]

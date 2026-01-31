@@ -398,6 +398,8 @@ extension TunnelDetailTableViewController: NSTableViewDelegate {
                 cell.value = tr(format: "tunnelPeerPersistentKeepaliveValue (%@)", peerData[field])
             } else if field == .preSharedKey {
                 cell.value = tr("tunnelPeerPresharedKeyEnabled")
+            } else if field == .useTunnel {
+                cell.value = tr(format: "Use Tunnel (%@)", peerData[field])
             } else {
                 cell.value = peerData[field]
             }

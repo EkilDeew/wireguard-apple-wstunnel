@@ -195,7 +195,7 @@ public class WireGuardAdapter {
                 self.logEndpointResolutionResults(resolutionResults)
 
                 self.state = .started(
-                    try self.startWireGuardBackend(wgConfig: wgConfig),
+                    try self.startWireGuardBackend(wgConfig: wgConfig, tunnelConfig: tunnelConfiguration),
                     settingsGenerator
                 )
                 self.networkMonitor = networkMonitor
@@ -311,7 +311,7 @@ public class WireGuardAdapter {
     ///   - networkSettings: an instance of type `NEPacketTunnelNetworkSettings`.
     /// - Throws: an error of type `WireGuardAdapterError`.
     /// - Returns: `PacketTunnelSettingsGenerator`.
-    private func setNetworkSettings(_ networkSettings: NEPacketTunnelNetworkSettings) throws {
+    private func setNetworkSettings(_ networkSettings: NEPacketTunnelNetworkSettings?) throws {
         var systemError: Error?
         let condition = NSCondition()
 
@@ -368,15 +368,51 @@ public class WireGuardAdapter {
     /// - Parameter wgConfig: WireGuard configuration
     /// - Throws: an error of type `WireGuardAdapterError`
     /// - Returns: tunnel handle
-    private func startWireGuardBackend(wgConfig: String) throws -> Int32 {
+    private func startWireGuardBackend(wgConfig: String, tunnelConfig: TunnelConfiguration) throws -> Int32 {
         guard let tunnelFileDescriptor = self.tunnelFileDescriptor else {
             throw WireGuardAdapterError.cannotLocateTunnelFileDescriptor
         }
 
+        logStdoutToFile()
+
+        for peer in tunnelConfig.peers where peer.useTunnel == true {
+            if let endpoint = peer.endpoint {
+
+                let endpointTunnel = "\(endpoint.host):\(endpoint.port)"
+
+                #if os(macOS)
+                if !tunnelConfig.interface.dns.isEmpty {
+                    fputs("Removing any dns settings\n", stdout)
+                    try setNetworkSettings(nil)
+                }
+                #endif
+
+                DispatchQueue.global().async {
+                    let portKnockPorts: [UInt16] = [443]
+                    portKnockPorts.withUnsafeBufferPointer { ptr in
+                        WSTunnel().connect_client(endpointTunnel, ptr)
+                    }
+                }
+
+                // Give time to wstunnel to setup itself and do the DNS requests
+                sleep(3)
+
+                #if os(macOS)
+                if !tunnelConfig.interface.dns.isEmpty {
+                    fputs("Re-setting the dns settings\n", stdout)
+                    let settingsGenerator = try self.makeSettingsGenerator(with: tunnelConfig)
+                    try self.setNetworkSettings(settingsGenerator.generateNetworkSettings())
+                }
+                #endif
+            }
+        }
+
+        self.logHandler(.verbose, "Starting wg [wgTurnOn]")
         let handle = wgTurnOn(wgConfig, tunnelFileDescriptor)
         if handle < 0 {
             throw WireGuardAdapterError.startWireGuardBackend(handle)
         }
+        self.logHandler(.verbose, "wg appears to have turned on successfully")
         #if os(iOS)
         wgDisableSomeRoamingForBrokenMobileSemantics(handle)
         #endif
@@ -449,7 +485,9 @@ public class WireGuardAdapter {
                 self.logEndpointResolutionResults(resolutionResults)
 
                 self.state = .started(
-                    try self.startWireGuardBackend(wgConfig: wgConfig),
+                    try self.startWireGuardBackend(
+                        wgConfig: wgConfig,
+                        tunnelConfig: settingsGenerator.tunnelConfiguration),
                     settingsGenerator
                 )
             } catch {
@@ -463,6 +501,15 @@ public class WireGuardAdapter {
         #else
         #error("Unsupported")
         #endif
+    }
+
+    private func logStdoutToFile() {
+        let allPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+        let documentsDirectory = allPaths.first!
+        let pathForLog = "\(documentsDirectory)/wstunnel.log"
+        self.logHandler(.verbose, "Redirecting stdout to log: \(pathForLog)")
+        freopen(pathForLog.cString(using: String.Encoding.ascii)!, "a+", stdout)
+        freopen(pathForLog.cString(using: String.Encoding.ascii)!, "a+", stderr)
     }
 }
 

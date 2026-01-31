@@ -49,3 +49,6 @@ Sources/WireGuardApp/Config/Developer.xcconfig
 
 # Vim
 .*.sw*
+
+# WSTunnel rust bridge that will be created on the fly during a build
+SwiftBridgeCore.*

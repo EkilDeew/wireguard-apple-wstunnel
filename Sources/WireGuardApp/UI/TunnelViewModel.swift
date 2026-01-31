@@ -42,6 +42,7 @@ class TunnelViewModel {
         case preSharedKey
         case endpoint
         case persistentKeepAlive
+        case useTunnel
         case allowedIPs
         case rxBytes
         case txBytes
@@ -61,6 +62,7 @@ class TunnelViewModel {
             case .lastHandshakeTime: return tr("tunnelPeerLastHandshakeTime")
             case .excludePrivateIPs: return tr("tunnelPeerExcludePrivateIPs")
             case .deletePeer: return tr("deletePeerButtonTitle")
+            case .useTunnel: return "Use Tunnel"
             }
         }
     }
@@ -326,6 +328,9 @@ class TunnelViewModel {
             if let lastHandshakeTime = config.lastHandshakeTime {
                 scratchpad[.lastHandshakeTime] = prettyTimeAgo(timestamp: lastHandshakeTime)
             }
+            if let useTunnel = config.useTunnel {
+                scratchpad[.useTunnel] = useTunnel ? "on" : "off"
+            }
             return scratchpad
         }
 
@@ -379,6 +384,9 @@ class TunnelViewModel {
                     fieldsWithError.insert(.persistentKeepAlive)
                     errorMessages.append(tr("alertInvalidPeerMessagePersistentKeepaliveInvalid"))
                 }
+            }
+            if let useTunnel = scratchpad[.useTunnel] {
+                config.useTunnel = useTunnel == "on"
             }
 
             guard errorMessages.isEmpty else { return .error(errorMessages.first!) }
